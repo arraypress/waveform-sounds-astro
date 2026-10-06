@@ -88,15 +88,17 @@ applies. Types come straight from the core's `WaveformSoundsOptions`.
 | `manifest` | `string` | — | URL, fetched in the browser when there are no `sounds`. |
 | `player` | `'inline' \| 'strip'` | `'inline'` | Mini waveform per row, or one docked player. |
 | `search` | `boolean` | `true` | Search box. |
-| `filters` | `('type' \| 'key' \| 'bpm')[]` | all three | `[]` = no filter controls. |
-| `sortable` | `boolean` | `true` | Sort menu. |
+| `filters` | `('type' \| 'key' \| 'bpm')[]` | all three | `[]` = no filter controls. Drop one from `filters`, `columns` and `sorts` to remove it everywhere. |
+| `sorts` | `SoundsSort[]` | all five | Orders the Sort menu offers; the first is the start order. `[]` = no menu. |
+| `showCount` | `boolean` | `true` | The "12 of 300 sounds" line. |
+| `menuSearch` | `number` | `8` | Type / key / sort dropdowns with more options than this get a search field. |
 | `loopToggle` | `boolean` | `true` | Loop button. |
 | `pageSize` | `number` | `50` | Rows before "Show more"; `0` = all. |
 | `maxTypeChips` | `number` | `10` | More types than this become a menu. |
 | `columns` | `('type' \| 'bpm' \| 'key' \| 'duration')[]` | all four | Order is kept. |
 | `waveformStyle` | `'mirror' \| 'bars'` | `'mirror'` | Row waveform. |
-| `waveformColor` | `string` | CSS `--ws-wave-color` | |
-| `progressColor` | `string` | CSS `--ws-progress-color` | |
+| `waveformColor` | `string` | CSS `--ws-wave-color` | Default derives from `currentColor`. |
+| `progressColor` | `string` | CSS `--ws-progress-color` | Default derives from `currentColor`. |
 | `barWidth` | `number` | `2` | Row bar width, CSS px. |
 | `barGap` | `number` | `1` | Gap between row bars, CSS px. |
 | `loop` | `boolean` | `false` | Start with Loop on. |
@@ -109,6 +111,24 @@ applies. Types come straight from the core's `WaveformSoundsOptions`.
 
 Not available as props: the `on*` callbacks (see Events) and `playerClass`
 (the page's `window.WaveformPlayer` is used — see below).
+
+## Theming
+
+No accent is needed: like the rest of the family the list is colour-agnostic.
+Everything derives from `currentColor`, so it fits light and dark pages as
+is, and the "on" states (selected chip, playing row) invert. Opt into a
+brand colour with `--ws-accent` / `--ws-on-accent` if you want one.
+
+Set `--ws-surface` to your page background. The runtime detects it, but a
+server-rendered list paints before any script runs, so the first paint
+(dropdown and button fills) uses the CSS value:
+
+```css
+.waveform-sounds { --ws-surface: var(--color-bg); }
+```
+
+Other properties: `--ws-wave-color`, `--ws-progress-color`, `--ws-border`,
+`--ws-radius`, `--ws-control-radius`, … (see the core's README).
 
 ## Events
 

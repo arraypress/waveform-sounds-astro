@@ -65,7 +65,9 @@ const {
 	player,
 	search,
 	filters,
-	sortable,
+	sorts,
+	showCount,
+	menuSearch,
 	loopToggle,
 	pageSize,
 	maxTypeChips,
@@ -106,7 +108,7 @@ const setNum = (key: string, value: number | undefined | null): void => {
 /**
  * A boolean attr as `"true"` / `"false"`. The core reads a bare or `"true"`
  * attribute as on and `"false"` as off, so the explicit `"false"` is what
- * turns a default-on control (search, sort, loop toggle) off.
+ * turns a default-on control (search, count, loop toggle) off.
  */
 const setBool = (key: string, value: boolean | undefined | null): void => {
 	if (value === undefined || value === null) return;
@@ -116,7 +118,8 @@ const setBool = (key: string, value: boolean | undefined | null): void => {
 /**
  * A list attr, comma-separated. An EMPTY array is emitted as `""` on
  * purpose: the core reads that as "none" (`filters={[]}` = no filter
- * controls), which is different from omitting it (= the default set).
+ * controls, `sorts={[]}` = no sort menu), which is different from omitting
+ * it (= the default set).
  */
 const setList = (key: string, value: readonly string[] | undefined | null): void => {
 	if (!Array.isArray(value)) return;
@@ -141,7 +144,9 @@ data['data-player'] = layout;
 setStr('data-manifest', manifest);
 setBool('data-search', search);
 setList('data-filters', filters);
-setBool('data-sortable', sortable);
+setList('data-sorts', sorts);
+setBool('data-show-count', showCount);
+setNum('data-menu-search', menuSearch);
 setBool('data-loop-toggle', loopToggle);
 setNum('data-page-size', pageSize);
 setNum('data-max-type-chips', maxTypeChips);
@@ -169,7 +174,9 @@ const inner = Array.isArray(sounds)
 			player: layout,
 			search,
 			filters,
-			sortable,
+			sorts,
+			showCount,
+			menuSearch,
 			loopToggle,
 			pageSize,
 			maxTypeChips,

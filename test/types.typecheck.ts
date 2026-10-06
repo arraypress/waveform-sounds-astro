@@ -20,6 +20,9 @@ const assert = <T extends true>(): T => true as T;
 assert<Equal<WaveformSoundsProps['player'], WaveformSoundsOptions['player']>>();
 assert<Equal<WaveformSoundsProps['filters'], WaveformSoundsOptions['filters']>>();
 assert<Equal<WaveformSoundsProps['columns'], WaveformSoundsOptions['columns']>>();
+assert<Equal<WaveformSoundsProps['sorts'], WaveformSoundsOptions['sorts']>>();
+assert<Equal<WaveformSoundsProps['showCount'], boolean | undefined>>();
+assert<Equal<WaveformSoundsProps['menuSearch'], number | undefined>>();
 assert<Equal<WaveformSoundsProps['strings'], WaveformSoundsOptions['strings']>>();
 assert<Equal<WaveformSoundsProps['sounds'], WaveformSoundsOptions['sounds']>>();
 assert<Equal<WaveformSoundsProps['manifest'], WaveformSoundsOptions['manifest']>>();
@@ -44,6 +47,9 @@ assert<Equal<WaveformSoundsProps['class'], string | undefined>>();
 // Strict: unknown props and callbacks are errors.
 // @ts-expect-error — no index signature
 const typo: WaveformSoundsProps = { pagesize: 10 };
+// @ts-expect-error — `sortable` was removed from the core (use `sorts={[]}`)
+const removed: WaveformSoundsProps = { sortable: false };
+void removed;
 // @ts-expect-error — callbacks can't cross SSR
 const callback: WaveformSoundsProps = { onPlay: () => {} };
 void typo;

@@ -44,6 +44,7 @@ const SAMPLES: Record<string, unknown> = {
 	manifest: '/sounds.json',
 	player: 'strip',
 	filters: ['bpm'],
+	sorts: ['bpm', 'title'],
 	columns: ['key', 'bpm'],
 	waveformStyle: 'bars',
 	waveformColor: '#123456',

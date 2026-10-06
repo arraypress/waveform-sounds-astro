@@ -107,7 +107,8 @@ describe('<WaveformSounds> — container', () => {
 	it('emits no option attributes when no options are set', async () => {
 		const tag = containerTag(await render({ sounds: SOUNDS }));
 		for (const name of [
-			'data-manifest', 'data-search', 'data-filters', 'data-sortable', 'data-loop-toggle',
+			'data-manifest', 'data-search', 'data-filters', 'data-sorts', 'data-show-count',
+			'data-menu-search', 'data-loop-toggle',
 			'data-page-size', 'data-max-type-chips', 'data-columns', 'data-waveform-style',
 			'data-waveform-color', 'data-progress-color', 'data-bar-width', 'data-bar-gap', 'data-loop', 'data-auto-advance',
 			'data-arrow-audition', 'data-strings', 'data-player-options', 'id',
@@ -133,7 +134,7 @@ describe('<WaveformSounds> — options as data-* attributes', () => {
 			await render({
 				sounds: SOUNDS,
 				search: false,
-				sortable: false,
+				showCount: false,
 				loopToggle: false,
 				loop: true,
 				autoAdvance: true,
@@ -141,7 +142,7 @@ describe('<WaveformSounds> — options as data-* attributes', () => {
 			})
 		);
 		expect(getAttr(tag, 'data-search')).toBe('false');
-		expect(getAttr(tag, 'data-sortable')).toBe('false');
+		expect(getAttr(tag, 'data-show-count')).toBe('false');
 		expect(getAttr(tag, 'data-loop-toggle')).toBe('false');
 		expect(getAttr(tag, 'data-loop')).toBe('true');
 		expect(getAttr(tag, 'data-auto-advance')).toBe('true');
@@ -150,10 +151,11 @@ describe('<WaveformSounds> — options as data-* attributes', () => {
 
 	it('emits numbers, keeping 0 (pageSize 0 = show all)', async () => {
 		const tag = containerTag(
-			await render({ sounds: SOUNDS, pageSize: 0, maxTypeChips: 4, barWidth: 3, barGap: 0 })
+			await render({ sounds: SOUNDS, pageSize: 0, maxTypeChips: 4, menuSearch: 0, barWidth: 3, barGap: 0 })
 		);
 		expect(getAttr(tag, 'data-page-size')).toBe('0');
 		expect(getAttr(tag, 'data-max-type-chips')).toBe('4');
+		expect(getAttr(tag, 'data-menu-search')).toBe('0');
 		expect(getAttr(tag, 'data-bar-width')).toBe('3');
 		expect(getAttr(tag, 'data-bar-gap')).toBe('0');
 	});
@@ -164,12 +166,16 @@ describe('<WaveformSounds> — options as data-* attributes', () => {
 	});
 
 	it('emits lists comma-separated, and an empty list as "" (= none, not the default)', async () => {
-		const tag = containerTag(await render({ sounds: SOUNDS, filters: ['key', 'bpm'], columns: ['bpm'] }));
+		const tag = containerTag(
+			await render({ sounds: SOUNDS, filters: ['key', 'bpm'], sorts: ['bpm', 'title'], columns: ['bpm'] })
+		);
 		expect(getAttr(tag, 'data-filters')).toBe('key,bpm');
+		expect(getAttr(tag, 'data-sorts')).toBe('bpm,title');
 		expect(getAttr(tag, 'data-columns')).toBe('bpm');
 
-		const none = containerTag(await render({ sounds: SOUNDS, filters: [] }));
+		const none = containerTag(await render({ sounds: SOUNDS, filters: [], sorts: [] }));
 		expect(getAttr(none, 'data-filters')).toBe('');
+		expect(getAttr(none, 'data-sorts')).toBe('');
 	});
 
 	it('emits strings verbatim (style, colours, manifest)', async () => {
@@ -201,7 +207,20 @@ describe('<WaveformSounds> — options as data-* attributes', () => {
 
 describe('<WaveformSounds> — server-rendered list', () => {
 	it('renders exactly what the core renderer renders for the same sounds + options', async () => {
-		const options = { player: 'strip' as const, pageSize: 2, columns: ['bpm' as const], strings: { count: '{count} x' } };
+		// One non-default value for every option the renderer reads.
+		const options = {
+			player: 'strip' as const,
+			search: false,
+			filters: ['key' as const],
+			sorts: ['title' as const, 'bpm' as const],
+			showCount: true,
+			menuSearch: 1,
+			loopToggle: false,
+			pageSize: 2,
+			maxTypeChips: 1,
+			columns: ['bpm' as const],
+			strings: { count: '{count} x', sortBy: 'Order' },
+		};
 		const html = await render({ sounds: SOUNDS, ...options });
 		expect(innerOf(html)).toBe(renderSounds(SOUNDS, options));
 	});
@@ -220,13 +239,24 @@ describe('<WaveformSounds> — server-rendered list', () => {
 		expect(html).toContain('data-ws-list');
 	});
 
-	it('renders the toolbar from the data (type chips, key menu, BPM range, count)', async () => {
+	it('renders the toolbar from the data (type chips, key + sort menus, BPM range, count)', async () => {
 		const html = await render({ sounds: SOUNDS });
 		expect(html).toContain('data-ws-search');
 		expect([...html.matchAll(/data-ws-type="/g)]).toHaveLength(4); // All + 3 types
-		expect(html).toContain('data-ws-key');
+		expect(html).toContain('<span class="ws-chip-label">Drums</span>');
+		expect(html).toContain('data-ws-menu="key"');
+		expect(html).toContain('data-ws-menu="sort"');
+		expect(html).not.toContain('<select');
 		expect(html).toContain('data-ws-bpm-min');
 		expect(html).toContain('3 sounds');
+	});
+
+	it('lets sorts / showCount / filters remove controls from the SSR markup', async () => {
+		const html = await render({ sounds: SOUNDS, sorts: [], showCount: false, filters: ['type'] });
+		expect(html).not.toContain('data-ws-menu="sort"');
+		expect(html).not.toContain('data-ws-menu="key"');
+		expect(html).not.toContain('3 sounds');
+		expect(html).toContain('data-ws-type="Drums"');
 	});
 
 	it('lets the options shape the SSR markup (strings, toggles, layout, paging)', async () => {
@@ -250,7 +280,7 @@ describe('<WaveformSounds> — server-rendered list', () => {
 
 	it('uses a type menu instead of chips past maxTypeChips', async () => {
 		const html = await render({ sounds: SOUNDS, maxTypeChips: 2 });
-		expect(html).toContain('data-ws-type-select');
+		expect(html).toContain('data-ws-menu="type"');
 		expect(html).not.toContain('data-ws-type="');
 	});
 

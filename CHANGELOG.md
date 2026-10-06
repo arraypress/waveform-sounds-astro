@@ -18,8 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   markup. Given only `manifest`, it renders an empty container with
   `data-manifest` for the runtime to fetch.
 - Props typed from the core's `WaveformSoundsOptions`: `sounds`, `manifest`,
-  `player`, `search`, `filters`, `sortable`, `loopToggle`, `pageSize`,
-  `maxTypeChips`, `columns`, `waveformStyle`, `waveformColor`,
+  `player`, `search`, `filters`, `sorts`, `showCount`, `menuSearch`,
+  `loopToggle`, `pageSize`, `maxTypeChips`, `columns`, `waveformStyle`, `waveformColor`,
   `progressColor`, `barWidth`, `barGap`, `loop`, `autoAdvance`, `arrowAudition`, `strings` and
   `playerOptions` (JSON), plus `id` and `class`. Each is emitted as the
   `data-*` attribute the core reads; an omitted prop emits nothing.
