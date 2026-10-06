@@ -20,19 +20,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Props typed from the core's `WaveformSoundsOptions`: `sounds`, `manifest`,
   `player`, `search`, `filters`, `sortable`, `loopToggle`, `pageSize`,
   `maxTypeChips`, `columns`, `waveformStyle`, `waveformColor`,
-  `progressColor`, `loop`, `autoAdvance`, `arrowAudition`, `strings` and
+  `progressColor`, `barWidth`, `barGap`, `loop`, `autoAdvance`, `arrowAudition`, `strings` and
   `playerOptions` (JSON), plus `id` and `class`. Each is emitted as the
   `data-*` attribute the core reads; an omitted prop emits nothing.
 - A processed client script (one bundled module, identical on every page —
-  safe under a strict hash-based CSP) that loads the player and the sounds
-  runtime, initialises on load and on every `astro:page-load`, and destroys
+  safe under a strict hash-based CSP) that loads the sounds runtime,
+  initialises on load and on every `astro:page-load`, and destroys
   instances whose element left the page on `astro:after-swap`
   (`transition:persist` lists are kept).
+- The player is never replaced: if the page already has `window.WaveformPlayer`
+  once its own scripts have run (e.g. a persistent WaveformBar's), the list
+  uses it, so `singlePlay` keeps working between them. Only otherwise is
+  `@arraypress/waveform-player/no-autoinit` loaded, by dynamic import.
 - A forwarding-drift test that round-trips every core option through the
   emitted attributes and the real core's constructor.
 
 ### Not forwarded
 
-- The `on*` callbacks (use the `waveformsounds:*` DOM events), `playerClass`,
-  and `barWidth` / `barGap`, which `@arraypress/waveform-sounds@0.1.0` has no
-  `data-*` form for.
+- The `on*` callbacks (use the `waveformsounds:*` DOM events) and
+  `playerClass`.

@@ -5,19 +5,22 @@
  * processed `<script>`. Astro bundles it into one external module per site,
  * identical on every page — which is what a strict hash-based CSP needs.
  * Per-instance configuration travels in `data-*` attributes only, never in
- * the script.
+ * the script. (The player, when needed, is a second external chunk loaded by
+ * dynamic import — still no inline script.)
  *
- * - `@arraypress/waveform-player/no-autoinit` registers
- *   `window.WaveformPlayer`, which the sounds runtime constructs its one audio
- *   engine from. The no-autoinit entry is deliberate: this component owns
- *   `[data-waveform-sounds]` markup, not `[data-waveform-player]`, so it
- *   doesn't scan the page for players it didn't render.
+ * - The player: {@link ensurePlayer} keeps a `window.WaveformPlayer` the page
+ *   already has (a theme's persistent WaveformBar, say — replacing it would
+ *   split `singlePlay` across two classes) and only otherwise loads
+ *   `@arraypress/waveform-player/no-autoinit`, which registers the global
+ *   without scanning for `[data-waveform-player]` markup this component
+ *   doesn't own.
  * - `@arraypress/waveform-sounds/no-autoinit` is the runtime without its own
  *   DOMContentLoaded scan; {@link bindLifecycle} decides when to initialise,
  *   including after ClientRouter navigations.
  */
-import '@arraypress/waveform-player/no-autoinit';
 import WaveformSounds from '@arraypress/waveform-sounds/no-autoinit';
-import { bindLifecycle } from './lifecycle';
+import { bindLifecycle, ensurePlayer } from './lifecycle';
 
-bindLifecycle(WaveformSounds);
+ensurePlayer(() => import('@arraypress/waveform-player/no-autoinit'))
+	.catch((err) => console.error('[WaveformSoundsAstro] could not load @arraypress/waveform-player:', err))
+	.then(() => bindLifecycle(WaveformSounds));

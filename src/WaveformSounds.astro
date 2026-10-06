@@ -33,7 +33,8 @@
  *
  * One processed (bundled) `<script>` — not `is:inline`, no `define:vars` —
  * so it's the same external module on every page, which a strict hash-based
- * CSP needs. It imports the player and the sounds runtime and initialises
+ * CSP needs. It loads the sounds runtime (and the player, only if the page
+ * has none — see `ensurePlayer` in `lifecycle.ts`) and initialises
  * on load, on every ClientRouter `astro:page-load`, and prunes instances
  * whose element left the page on `astro:after-swap`. See `lifecycle.ts`.
  *
@@ -73,6 +74,8 @@ const {
 	waveformStyle,
 	waveformColor,
 	progressColor,
+	barWidth,
+	barGap,
 	// ── Behaviour ─────────────────────────────────────────────────────────
 	loop,
 	autoAdvance,
@@ -146,6 +149,8 @@ setList('data-columns', columns);
 setStr('data-waveform-style', waveformStyle);
 setStr('data-waveform-color', waveformColor);
 setStr('data-progress-color', progressColor);
+setNum('data-bar-width', barWidth);
+setNum('data-bar-gap', barGap);
 setBool('data-loop', loop);
 setBool('data-auto-advance', autoAdvance);
 setBool('data-arrow-audition', arrowAudition);

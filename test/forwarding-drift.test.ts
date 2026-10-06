@@ -27,9 +27,7 @@ const Component = WaveformSoundsRaw as Parameters<AstroContainer['renderToString
 /** Core options deliberately NOT emitted as attributes, each with why. */
 const NOT_FORWARDED: Record<string, string> = {
 	sounds: 'rendered server-side into the rows the runtime adopts — not an attribute',
-	playerClass: 'a constructor; the client script bundles the player, found via window.WaveformPlayer',
-	barWidth: 'core 0.1.0 has no data-* form for it (readDataOptions skips it) — see CLAUDE.md',
-	barGap: 'core 0.1.0 has no data-* form for it (readDataOptions skips it) — see CLAUDE.md',
+	playerClass: "a constructor; the core uses window.WaveformPlayer (the page's, or the one client.ts loads)",
 	...Object.fromEntries(
 		SOUNDS_OPTIONS.filter(isCallback).map((key) => [key, 'callback: no runtime in static HTML'])
 	),
@@ -114,30 +112,6 @@ describe('forwarding drift vs the installed core', () => {
 			inst.destroy();
 		}
 		expect(dropped, 'options neither round-tripped nor in NOT_FORWARDED').toEqual([]);
-	});
-});
-
-/**
- * Core options with no `data-*` form today. Canary: once the core reads the
- * attribute, this fails — forward the option (props type, component, the
- * NOT_FORWARDED entry above) and drop it from this list.
- */
-const CORE_GAPS: Record<string, [attr: string, value: string]> = {
-	barWidth: ['data-bar-width', '5'],
-	barGap: ['data-bar-gap', '4'],
-};
-
-describe('core options without a data-* form', () => {
-	it('are still ignored by the core (else: start forwarding them)', async () => {
-		vi.spyOn(console, 'error').mockImplementation(() => {});
-		for (const [key, [attr, value]] of Object.entries(CORE_GAPS)) {
-			const el = await mount({ sounds: ONE_SOUND });
-			el.setAttribute(attr, value);
-			const inst = new WaveformSounds(el);
-			const got = (inst.options as Record<string, unknown>)[key];
-			expect(got, `the core now reads ${attr} — forward ${key}`).toBe(DEFAULT_OPTIONS[key]);
-			inst.destroy();
-		}
 	});
 });
 

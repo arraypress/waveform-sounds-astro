@@ -6,8 +6,7 @@
  *
  * The props derive from the core's `WaveformSoundsOptions`. These pin that
  * the derivation keeps the core's own types, removes exactly what can't be
- * forwarded (callbacks — matched by shape —, `playerClass`, and the
- * attribute-less `barWidth` / `barGap`), and stays strict (no index
+ * forwarded (callbacks — matched by shape — and `playerClass`), and stays strict (no index
  * signature, so a typo'd prop is an error).
  */
 import type { WaveformSoundsOptions } from '@arraypress/waveform-sounds';
@@ -25,13 +24,15 @@ assert<Equal<WaveformSoundsProps['strings'], WaveformSoundsOptions['strings']>>(
 assert<Equal<WaveformSoundsProps['sounds'], WaveformSoundsOptions['sounds']>>();
 assert<Equal<WaveformSoundsProps['manifest'], WaveformSoundsOptions['manifest']>>();
 assert<Equal<WaveformSoundsProps['pageSize'], number | undefined>>();
+assert<Equal<WaveformSoundsProps['barWidth'], number | undefined>>();
+assert<Equal<WaveformSoundsProps['barGap'], number | undefined>>();
 assert<Equal<WaveformSoundsProps['player'], 'inline' | 'strip' | undefined>>();
 
 // Exactly these are removed.
 assert<
 	Equal<
 		NotForwardedOption,
-		'onReady' | 'onPlay' | 'onPause' | 'onEnd' | 'onFilter' | 'onError' | 'playerClass' | 'barWidth' | 'barGap'
+		'onReady' | 'onPlay' | 'onPause' | 'onEnd' | 'onFilter' | 'onError' | 'playerClass'
 	>
 >();
 assert<Equal<Extract<keyof WaveformSoundsProps, NotForwardedOption>, never>>();

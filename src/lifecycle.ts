@@ -3,7 +3,9 @@
  * @description
  * The page lifecycle for `<WaveformSounds>` — when to initialise and when to
  * tear down — kept free of imports so it can be tested against a stand-in.
- * `client.ts` supplies the real `WaveformSounds` class.
+ * `client.ts` supplies the real `WaveformSounds` class. Also here:
+ * {@link ensurePlayer}, which loads the bundled player only when the page
+ * has none.
  *
  * Three moments:
  *
@@ -71,5 +73,52 @@ export function bindLifecycle(runtime: SoundsRuntime, doc: Document = document):
 	});
 
 	init();
+	return true;
+}
+
+/** The window slice {@link ensurePlayer} reads. */
+type PlayerHost = { WaveformPlayer?: unknown };
+
+/** The document slice {@link ensurePlayer} waits on. */
+type ReadyDoc = Pick<Document, 'readyState' | 'addEventListener'>;
+
+/**
+ * Resolve once every static script on the page has run: immediately when the
+ * document is complete, else at `DOMContentLoaded` (which waits for deferred
+ * and module scripts) — or `load`, for an async script that missed it.
+ */
+function afterPageScripts(doc: ReadyDoc): Promise<void> {
+	if (doc.readyState === 'complete') return Promise.resolve();
+	return new Promise((resolve) => {
+		doc.addEventListener('DOMContentLoaded', () => resolve(), { once: true });
+		doc.addEventListener('load', () => resolve(), { once: true });
+	});
+}
+
+/**
+ * Make sure a `WaveformPlayer` class is on `window`, WITHOUT replacing one the
+ * page already has.
+ *
+ * The sounds runtime constructs its engine from `window.WaveformPlayer`, and
+ * the player's `singlePlay` hand-off only works between instances of the SAME
+ * class. A page that already runs a player — e.g. a theme's persistent
+ * WaveformBar, from its own copy — must keep its class, or the list and the
+ * bar stop pausing each other. So the page's scripts get to run first, and the
+ * bundled player is loaded (by `load`, a dynamic import) only when there is
+ * still no global.
+ *
+ * @param load - Loads the player (registers `window.WaveformPlayer`).
+ * @param win - The window to check.
+ * @param doc - The document whose scripts to wait for.
+ * @returns `true` when `load` ran, `false` when the page's player was kept.
+ */
+export async function ensurePlayer(
+	load: () => Promise<unknown>,
+	win: PlayerHost = window as unknown as PlayerHost,
+	doc: ReadyDoc = document
+): Promise<boolean> {
+	await afterPageScripts(doc);
+	if (win.WaveformPlayer) return false;
+	await load();
 	return true;
 }

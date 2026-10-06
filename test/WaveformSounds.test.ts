@@ -109,7 +109,7 @@ describe('<WaveformSounds> — container', () => {
 		for (const name of [
 			'data-manifest', 'data-search', 'data-filters', 'data-sortable', 'data-loop-toggle',
 			'data-page-size', 'data-max-type-chips', 'data-columns', 'data-waveform-style',
-			'data-waveform-color', 'data-progress-color', 'data-loop', 'data-auto-advance',
+			'data-waveform-color', 'data-progress-color', 'data-bar-width', 'data-bar-gap', 'data-loop', 'data-auto-advance',
 			'data-arrow-audition', 'data-strings', 'data-player-options', 'id',
 		]) {
 			expectNoAttr(tag, name);
@@ -118,10 +118,8 @@ describe('<WaveformSounds> — container', () => {
 
 	it('never emits attributes for the options it cannot forward', async () => {
 		const tag = containerTag(
-			await render({ sounds: SOUNDS, ...({ barWidth: 3, barGap: 2, playerClass: {} } as object) })
+			await render({ sounds: SOUNDS, ...({ playerClass: {} } as object) })
 		);
-		expectNoAttr(tag, 'data-bar-width');
-		expectNoAttr(tag, 'data-bar-gap');
 		expectNoAttr(tag, 'data-player-class');
 		expectNoAttr(tag, 'data-sounds');
 	});
@@ -151,9 +149,13 @@ describe('<WaveformSounds> — options as data-* attributes', () => {
 	});
 
 	it('emits numbers, keeping 0 (pageSize 0 = show all)', async () => {
-		const tag = containerTag(await render({ sounds: SOUNDS, pageSize: 0, maxTypeChips: 4 }));
+		const tag = containerTag(
+			await render({ sounds: SOUNDS, pageSize: 0, maxTypeChips: 4, barWidth: 3, barGap: 0 })
+		);
 		expect(getAttr(tag, 'data-page-size')).toBe('0');
 		expect(getAttr(tag, 'data-max-type-chips')).toBe('4');
+		expect(getAttr(tag, 'data-bar-width')).toBe('3');
+		expect(getAttr(tag, 'data-bar-gap')).toBe('0');
 	});
 
 	it('ignores a non-finite number', async () => {

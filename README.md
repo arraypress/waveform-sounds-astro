@@ -31,8 +31,8 @@ import '@arraypress/waveform-sounds/styles.css';
 ```
 
 The JavaScript is handled for you: the component ships a bundled client
-script that loads the player and the sounds runtime. Don't also add them with
-`<script>` tags.
+script that loads the sounds runtime, and the player too unless the page
+already has one (see below).
 
 ## Usage
 
@@ -97,6 +97,8 @@ applies. Types come straight from the core's `WaveformSoundsOptions`.
 | `waveformStyle` | `'mirror' \| 'bars'` | `'mirror'` | Row waveform. |
 | `waveformColor` | `string` | CSS `--ws-wave-color` | |
 | `progressColor` | `string` | CSS `--ws-progress-color` | |
+| `barWidth` | `number` | `2` | Row bar width, CSS px. |
+| `barGap` | `number` | `1` | Gap between row bars, CSS px. |
 | `loop` | `boolean` | `false` | Start with Loop on. |
 | `autoAdvance` | `boolean` | `false` | Play the next visible sound at the end. |
 | `arrowAudition` | `boolean` | `true` | ↑/↓ play the next row while playing. |
@@ -105,9 +107,8 @@ applies. Types come straight from the core's `WaveformSoundsOptions`.
 | `id` | `string` | — | Container id. |
 | `class` | `string` | — | Added to `waveform-sounds waveform-sounds--<player>`. |
 
-Not available as props: the `on*` callbacks (see Events), `playerClass`
-(the bundled player is used), and `barWidth` / `barGap` (the core has no
-`data-*` form for them yet — set them in JavaScript if you need them).
+Not available as props: the `on*` callbacks (see Events) and `playerClass`
+(the page's `window.WaveformPlayer` is used — see below).
 
 ## Events
 
@@ -150,14 +151,18 @@ on every `astro:page-load`, and on `astro:after-swap` destroys the instances
 whose element left the page (stopping their audio). A list inside a
 `transition:persist` element is carried over and keeps playing.
 
-## Using it next to `<WaveformPlayer>` / `<WaveformPlaylist>`
+## Using it next to other players (WaveformBar, `<WaveformPlayer>`, …)
 
-This component bundles `@arraypress/waveform-player` from npm. If other
-players on the same page load the player from a `<script>` tag (the other
-Astro wrappers' documented setup), the page ends up with two copies, and
-`singlePlay` won't pause across them. Import the player from npm everywhere
-(`import '@arraypress/waveform-player'` in a `<script>`) so the bundler
-loads one copy.
+The list plays through a `WaveformPlayer`, and `singlePlay` (one sound at a
+time across the page) only works between players of the same class. So the
+client script never replaces a player the page already has: it waits for the
+page's own scripts to run (`DOMContentLoaded`) and uses
+`window.WaveformPlayer` if it's there — a persistent WaveformBar's, or one
+loaded by a `<script>` tag. Only when there is none does it load the bundled
+`@arraypress/waveform-player` (a separate chunk, by dynamic import).
+
+A player your code loads LATER than that (from its own dynamic import) can't
+be detected; load it from a static `<script>`/import instead.
 
 ## License
 

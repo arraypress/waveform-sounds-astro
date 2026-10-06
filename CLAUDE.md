@@ -27,19 +27,18 @@ destructure, a wrong attribute name or a wrong encoding all fail it. A deliberat
 unforwarded option goes in `NOT_FORWARDED` with a reason (and in `NotForwardedOption`
 in `src/types.ts`); a new option with a `null` default needs a `SAMPLES` entry.
 
-## Known core gap
-`barWidth` / `barGap` have no `data-*` form in waveform-sounds 0.1.0, so they're
-excluded from the props. The `CORE_GAPS` canary in the drift test fails the day the
-core starts reading `data-bar-width` / `data-bar-gap` — then forward them.
-
 ## Client script (`src/client.ts` + `src/lifecycle.ts`)
 - A **processed** `<script>` — never `is:inline`, never `define:vars`. The family's
   themes run a strict hash-based CSP; this keeps the script one external module,
   identical on every page. Per-instance data goes in `data-*` only. (The other astro
   wrappers still use `is:inline` + a script-tag core; this one bundles its deps.)
-- Imports `@arraypress/waveform-player/no-autoinit` (registers `window.WaveformPlayer`
-  without scanning for `[data-waveform-player]` markup this component doesn't own) and
-  `@arraypress/waveform-sounds/no-autoinit`.
+- **Never replaces the page's player.** `ensurePlayer()` waits for the page's own
+  scripts (`DOMContentLoaded`, or `load`), keeps an existing `window.WaveformPlayer`
+  (e.g. a theme's persistent WaveformBar's copy), and only otherwise dynamic-imports
+  `@arraypress/waveform-player/no-autoinit` (a second external chunk — still no inline
+  script). Overwriting the global would split `singlePlay` across two classes: the list
+  and the bar would stop pausing each other. Then `bindLifecycle()`. Don't turn this back
+  into a static import. `@arraypress/waveform-sounds/no-autoinit` is imported statically.
 - `init()` now + on `astro:page-load`; `prune()` on `astro:after-swap` (NOT
   before-swap: the core prunes `!el.isConnected`, and nothing is disconnected yet
   before the swap). `transition:persist` lists stay connected → kept. Bound once per
@@ -49,7 +48,8 @@ core starts reading `data-bar-width` / `data-bar-gap` — then forward them.
   not restore adopted markup — re-render before constructing over the same element.
 - Verified in headless Chrome against a real `astro build` (2026-10-06): one external
   script per page, same file on both pages, mount → navigate (prune) → back (re-init,
-  manifest re-fetched).
+  manifest re-fetched); with a page-loaded player the bundled chunk is never fetched and
+  the engine is an instance of the page's class.
 
 ## Dev dependency on an unpublished core
 `@arraypress/waveform-sounds` is a `file:../waveform-sounds` devDependency because

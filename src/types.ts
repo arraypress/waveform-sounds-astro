@@ -49,20 +49,11 @@ type CallbackKeys<T> = {
  *  - the `on*` callbacks — a server-rendered component emits static HTML,
  *    and a function can't cross into a `data-*` attribute. Listen for the
  *    bubbling `waveformsounds:*` DOM events instead.
- *  - `playerClass` — a constructor reference; the component's client script
- *    bundles `@arraypress/waveform-player` and the core finds it through
- *    `window.WaveformPlayer`.
- *  - `barWidth` / `barGap` — `@arraypress/waveform-sounds@0.1.0` has no
- *    `data-*` form for them (`readDataOptions` doesn't read them), so there
- *    is nothing to emit that the runtime would see. Restore them here (and in
- *    the component + drift test) once the core reads `data-bar-width` /
- *    `data-bar-gap`.
+ *  - `playerClass` — a constructor reference; the core finds the player
+ *    through `window.WaveformPlayer` (the page's own copy if it has one,
+ *    else the one the client script loads).
  */
-export type NotForwardedOption =
-	| CallbackKeys<WaveformSoundsOptions>
-	| 'playerClass'
-	| 'barWidth'
-	| 'barGap';
+export type NotForwardedOption = CallbackKeys<WaveformSoundsOptions> | 'playerClass';
 
 /**
  * Props accepted by the `<WaveformSounds>` Astro component: the core's own

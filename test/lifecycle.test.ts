@@ -11,10 +11,12 @@
  */
 import { describe, it, expect, beforeAll, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import WaveformSoundsRaw from '../src/WaveformSounds.astro';
 import type { WaveformSounds as WaveformSoundsClass } from '@arraypress/waveform-sounds';
-import { bindLifecycle } from '../src/lifecycle';
+import { bindLifecycle, ensurePlayer } from '../src/lifecycle';
 import { installDom } from './dom';
 
 const Component = WaveformSoundsRaw as Parameters<AstroContainer['renderToString']>[0];
@@ -80,6 +82,53 @@ describe('bindLifecycle — with a stand-in runtime', () => {
 		expect(err).toHaveBeenCalledTimes(2);
 		expect(String(err.mock.calls[0][0])).toContain('[WaveformSoundsAstro]');
 		err.mockRestore();
+	});
+});
+
+describe('ensurePlayer — never replaces the page\'s player', () => {
+	const complete = { readyState: 'complete', addEventListener: () => {} } as unknown as Document;
+
+	it('keeps an existing window.WaveformPlayer and does not load the bundled one', async () => {
+		const pagePlayer = class PagePlayer {};
+		const win: { WaveformPlayer?: unknown } = { WaveformPlayer: pagePlayer };
+		const load = vi.fn(async () => {
+			win.WaveformPlayer = class Bundled {};
+		});
+		expect(await ensurePlayer(load, win, complete)).toBe(false);
+		expect(load).not.toHaveBeenCalled();
+		expect(win.WaveformPlayer).toBe(pagePlayer);
+	});
+
+	it('loads the bundled player when there is none', async () => {
+		const win: { WaveformPlayer?: unknown } = {};
+		const load = vi.fn(async () => {
+			win.WaveformPlayer = class Bundled {};
+		});
+		expect(await ensurePlayer(load, win, complete)).toBe(true);
+		expect(load).toHaveBeenCalledTimes(1);
+		expect(win.WaveformPlayer).toBeTypeOf('function');
+	});
+
+	it("waits for the page's own scripts (DOMContentLoaded) before deciding", async () => {
+		const doc = new JSDOM('<!doctype html><body></body>', { url: 'http://localhost/' }).window.document;
+		Object.defineProperty(doc, 'readyState', { value: 'interactive', configurable: true });
+		const win: { WaveformPlayer?: unknown } = {};
+		const load = vi.fn(async () => {});
+		const pending = ensurePlayer(load, win, doc);
+		// A later module script on the page registers its player…
+		const pagePlayer = class PagePlayer {};
+		win.WaveformPlayer = pagePlayer;
+		doc.dispatchEvent(new doc.defaultView!.Event('DOMContentLoaded'));
+		// …and is kept.
+		expect(await pending).toBe(false);
+		expect(load).not.toHaveBeenCalled();
+		expect(win.WaveformPlayer).toBe(pagePlayer);
+	});
+
+	it('the client script loads the player by dynamic import, behind ensurePlayer', () => {
+		const src = readFileSync(resolve(process.cwd(), 'src/client.ts'), 'utf8');
+		expect(src).not.toMatch(/^import\s+['"]@arraypress\/waveform-player/m);
+		expect(src).toMatch(/ensurePlayer\(\(\) => import\('@arraypress\/waveform-player\/no-autoinit'\)\)/);
 	});
 });
 
