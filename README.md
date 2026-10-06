@@ -69,10 +69,11 @@ With only `manifest` (and no `sounds`), the component renders an empty
 container with `data-manifest`, and the runtime fetches and renders the list.
 `sounds={[]}` counts as "given" — it renders an empty list, as the core does.
 
-Generate a manifest from a folder of previews:
+Generate a manifest from a folder of previews (`--base-url` is the folder's public URL;
+without it every URL is relative to the site root, `/kick.mp3`):
 
 ```bash
-npx @arraypress/waveform-gen ./public/previews/*.mp3 --manifest ./public/sounds.json
+npx @arraypress/waveform-gen ./public/previews/*.mp3 --manifest ./public/sounds.json --base-url /previews/
 ```
 
 To server-render a manifest instead, read it at build time and pass its
