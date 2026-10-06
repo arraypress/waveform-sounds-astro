@@ -108,7 +108,7 @@ describe('<WaveformSounds> — container', () => {
 		const tag = containerTag(await render({ sounds: SOUNDS }));
 		for (const name of [
 			'data-manifest', 'data-search', 'data-filters', 'data-sorts', 'data-show-count',
-			'data-menu-search', 'data-loop-toggle',
+			'data-menu-search', 'data-id-prefix', 'data-loop-toggle',
 			'data-page-size', 'data-max-type-chips', 'data-columns', 'data-waveform-style',
 			'data-waveform-color', 'data-progress-color', 'data-bar-width', 'data-bar-gap', 'data-loop', 'data-auto-advance',
 			'data-arrow-audition', 'data-strings', 'data-player-options', 'id',
@@ -215,6 +215,7 @@ describe('<WaveformSounds> — server-rendered list', () => {
 			sorts: ['title' as const, 'bpm' as const],
 			showCount: true,
 			menuSearch: 1,
+			idPrefix: 'pack',
 			loopToggle: false,
 			pageSize: 2,
 			maxTypeChips: 1,
@@ -249,6 +250,22 @@ describe('<WaveformSounds> — server-rendered list', () => {
 		expect(html).not.toContain('<select');
 		expect(html).toContain('data-ws-bpm-min');
 		expect(html).toContain('3 sounds');
+	});
+
+	it('prefixes the dropdown ids with idPrefix, else the id (as the core does when it renders)', async () => {
+		const ids = (html: string) => [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]).filter((v) => v !== 'x');
+		const own = await render({ sounds: SOUNDS, idPrefix: 'pack-a' });
+		expect(getAttr(containerTag(own), 'data-id-prefix')).toBe('pack-a');
+		expect(ids(own).length).toBeGreaterThan(0);
+		expect(ids(own).every((v) => v.startsWith('pack-a'))).toBe(true);
+
+		const fromId = await render({ sounds: SOUNDS, id: 'pack-b' });
+		expectNoAttr(containerTag(fromId), 'data-id-prefix');
+		expect(innerOf(fromId)).toBe(renderSounds(SOUNDS, { idPrefix: 'pack-b' }));
+
+		// Explicit idPrefix wins over id.
+		const both = await render({ sounds: SOUNDS, id: 'outer', idPrefix: 'inner' });
+		expect(innerOf(both)).toBe(renderSounds(SOUNDS, { idPrefix: 'inner' }));
 	});
 
 	it('lets sorts / showCount / filters remove controls from the SSR markup', async () => {

@@ -92,6 +92,7 @@ applies. Types come straight from the core's `WaveformSoundsOptions`.
 | `sorts` | `SoundsSort[]` | all five | Orders the Sort menu offers; the first is the start order. `[]` = no menu. |
 | `showCount` | `boolean` | `true` | The "12 of 300 sounds" line. |
 | `menuSearch` | `number` | `8` | Type / key / sort dropdowns with more options than this get a search field. |
+| `idPrefix` | `string` | the `id`, else a hash of the sounds | Prefix for the dropdowns' element ids. Two lists of the same sounds on one page need an `id` or `idPrefix` each. |
 | `loopToggle` | `boolean` | `true` | Loop button. |
 | `pageSize` | `number` | `50` | Rows before "Show more"; `0` = all. |
 | `maxTypeChips` | `number` | `10` | More types than this become a menu. |

@@ -45,6 +45,7 @@ const SAMPLES: Record<string, unknown> = {
 	player: 'strip',
 	filters: ['bpm'],
 	sorts: ['bpm', 'title'],
+	idPrefix: 'pack-a',
 	columns: ['key', 'bpm'],
 	waveformStyle: 'bars',
 	waveformColor: '#123456',

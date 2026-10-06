@@ -23,6 +23,7 @@ assert<Equal<WaveformSoundsProps['columns'], WaveformSoundsOptions['columns']>>(
 assert<Equal<WaveformSoundsProps['sorts'], WaveformSoundsOptions['sorts']>>();
 assert<Equal<WaveformSoundsProps['showCount'], boolean | undefined>>();
 assert<Equal<WaveformSoundsProps['menuSearch'], number | undefined>>();
+assert<Equal<WaveformSoundsProps['idPrefix'], string | undefined>>();
 assert<Equal<WaveformSoundsProps['strings'], WaveformSoundsOptions['strings']>>();
 assert<Equal<WaveformSoundsProps['sounds'], WaveformSoundsOptions['sounds']>>();
 assert<Equal<WaveformSoundsProps['manifest'], WaveformSoundsOptions['manifest']>>();

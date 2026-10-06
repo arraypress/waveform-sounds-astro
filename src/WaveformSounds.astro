@@ -68,6 +68,7 @@ const {
 	sorts,
 	showCount,
 	menuSearch,
+	idPrefix,
 	loopToggle,
 	pageSize,
 	maxTypeChips,
@@ -147,6 +148,7 @@ setList('data-filters', filters);
 setList('data-sorts', sorts);
 setBool('data-show-count', showCount);
 setNum('data-menu-search', menuSearch);
+setStr('data-id-prefix', idPrefix);
 setBool('data-loop-toggle', loopToggle);
 setNum('data-page-size', pageSize);
 setNum('data-max-type-chips', maxTypeChips);
@@ -177,6 +179,9 @@ const inner = Array.isArray(sounds)
 			sorts,
 			showCount,
 			menuSearch,
+			// The core's own client-render default (idPrefix, else the
+			// container id) — the SSR ids must match what it would build.
+			idPrefix: idPrefix || id || undefined,
 			loopToggle,
 			pageSize,
 			maxTypeChips,
