@@ -52,12 +52,7 @@ in `src/types.ts`); a new option with a `null` default needs a `SAMPLES` entry.
   the engine is an instance of the page's class.
 
 ## Dev dependency on an unpublished core
-`@arraypress/waveform-sounds` is a `file:../waveform-sounds` devDependency because
-0.1.0 isn't on npm yet. **Switch it to `^0.1.0` after the core is published** (and
-`npm install` so package-lock follows). Two consequences of the symlink, both handled:
-the drift test reads the core's `index.d.ts` with `fs` (Vite refuses `?raw` outside the
-root), and a consumer smoke build must install the core from a `npm pack` tarball (Astro
-can't compile a component's script through an out-of-root symlink).
+The core is an ordinary `^0.1.0` devDependency installed from npm. (Until 0.1.0 was published on 2026-10-07 it was a `file:../waveform-sounds` symlink, which needed a Vite `server.fs.allow` exception; both are gone.)
 
 ## Cross-repo
 Not yet in the `waveform-release` skill's 15-package list — add the sounds group
