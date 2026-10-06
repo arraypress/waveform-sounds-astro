@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Props typed from the core's `WaveformSoundsOptions`: `sounds`, `manifest`,
   `player`, `search`, `filters`, `sorts`, `showCount`, `menuSearch`,
   `idPrefix` (defaults to `id`, matching the core's own client render),
+  `urlState` (`"true"` / `"false"` or a prefix string),
   `loopToggle`, `pageSize`, `maxTypeChips`, `columns`, `waveformStyle`, `waveformColor`,
   `progressColor`, `barWidth`, `barGap`, `loop`, `autoAdvance`, `arrowAudition`, `strings` and
   `playerOptions` (JSON), plus `id` and `class`. Each is emitted as the

@@ -56,7 +56,8 @@ The whole list — toolbar, filter chips, every row — is in the HTML. The
 browser runtime adopts that markup instead of rebuilding it, so the list is
 readable and crawlable before any script runs. Give rows `peaks` (what
 `waveform-gen --manifest` writes) and the row waveforms draw without decoding
-any audio.
+any audio. A sound with `download: '/files/kick-01.wav'` gets a download
+button on its row (a plain `<a download>` — gating is up to your site).
 
 ### From a manifest — fetched in the browser
 
@@ -92,6 +93,7 @@ applies. Types come straight from the core's `WaveformSoundsOptions`.
 | `sorts` | `SoundsSort[]` | all five | Orders the Sort menu offers; the first is the start order. `[]` = no menu. |
 | `showCount` | `boolean` | `true` | The "12 of 300 sounds" line. |
 | `menuSearch` | `number` | `8` | Type / key / sort dropdowns with more options than this get a search field. |
+| `urlState` | `boolean \| string` | `false` | Keep filters + sort in the address (`?q=…&type=…`), shareable and refresh-proof. A string prefixes the parameter names, for several lists on a page. |
 | `idPrefix` | `string` | the `id`, else a hash of the sounds | Prefix for the dropdowns' element ids. Two lists of the same sounds on one page need an `id` or `idPrefix` each. |
 | `loopToggle` | `boolean` | `true` | Loop button. |
 | `pageSize` | `number` | `50` | Rows before "Show more"; `0` = all. |

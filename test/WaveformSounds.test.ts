@@ -108,7 +108,7 @@ describe('<WaveformSounds> — container', () => {
 		const tag = containerTag(await render({ sounds: SOUNDS }));
 		for (const name of [
 			'data-manifest', 'data-search', 'data-filters', 'data-sorts', 'data-show-count',
-			'data-menu-search', 'data-id-prefix', 'data-loop-toggle',
+			'data-menu-search', 'data-id-prefix', 'data-url-state', 'data-loop-toggle',
 			'data-page-size', 'data-max-type-chips', 'data-columns', 'data-waveform-style',
 			'data-waveform-color', 'data-progress-color', 'data-bar-width', 'data-bar-gap', 'data-loop', 'data-auto-advance',
 			'data-arrow-audition', 'data-strings', 'data-player-options', 'id',
@@ -147,6 +147,12 @@ describe('<WaveformSounds> — options as data-* attributes', () => {
 		expect(getAttr(tag, 'data-loop')).toBe('true');
 		expect(getAttr(tag, 'data-auto-advance')).toBe('true');
 		expect(getAttr(tag, 'data-arrow-audition')).toBe('false');
+	});
+
+	it('emits urlState as "true" / "false", or its prefix verbatim', async () => {
+		expect(getAttr(containerTag(await render({ sounds: SOUNDS, urlState: true })), 'data-url-state')).toBe('true');
+		expect(getAttr(containerTag(await render({ sounds: SOUNDS, urlState: false })), 'data-url-state')).toBe('false');
+		expect(getAttr(containerTag(await render({ sounds: SOUNDS, urlState: 'pack' })), 'data-url-state')).toBe('pack');
 	});
 
 	it('emits numbers, keeping 0 (pageSize 0 = show all)', async () => {
@@ -299,6 +305,19 @@ describe('<WaveformSounds> — server-rendered list', () => {
 		const html = await render({ sounds: SOUNDS, maxTypeChips: 2 });
 		expect(html).toContain('data-ws-menu="type"');
 		expect(html).not.toContain('data-ws-type="');
+	});
+
+	it('renders a download link only on rows that have one', async () => {
+		const html = await render({
+			sounds: [
+				{ url: '/a.mp3', title: 'Free Kick', download: '/files/free-kick.wav' },
+				{ url: '/b.mp3', title: 'Paid Bass' },
+			],
+		});
+		const [free, paid] = html.split('<li class="ws-row"').slice(1);
+		expect(free).toMatch(/<a class="ws-download" href="\/files\/free-kick\.wav" download/);
+		expect(getAttr(free, 'data-download')).toBe('/files/free-kick.wav');
+		expect(paid).not.toContain('ws-download');
 	});
 
 	it('escapes sound text (no markup injection through titles)', async () => {

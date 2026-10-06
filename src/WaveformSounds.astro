@@ -69,6 +69,7 @@ const {
 	showCount,
 	menuSearch,
 	idPrefix,
+	urlState,
 	loopToggle,
 	pageSize,
 	maxTypeChips,
@@ -149,6 +150,9 @@ setList('data-sorts', sorts);
 setBool('data-show-count', showCount);
 setNum('data-menu-search', menuSearch);
 setStr('data-id-prefix', idPrefix);
+// `true` / `false`, or a prefix string verbatim (the core reads all three).
+if (typeof urlState === 'boolean') setBool('data-url-state', urlState);
+else setStr('data-url-state', urlState);
 setBool('data-loop-toggle', loopToggle);
 setNum('data-page-size', pageSize);
 setNum('data-max-type-chips', maxTypeChips);

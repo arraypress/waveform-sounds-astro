@@ -117,6 +117,17 @@ describe('forwarding drift vs the installed core', () => {
 	});
 });
 
+describe('urlState — both forms', () => {
+	it('round-trips a prefix string and false', async () => {
+		for (const value of ['pack', false]) {
+			const el = await mount({ sounds: ONE_SOUND, urlState: value });
+			const inst = new WaveformSounds(el);
+			expect(inst.options.urlState).toBe(value);
+			inst.destroy();
+		}
+	});
+});
+
 describe('the runtime adopts the server-rendered markup', () => {
 	it('keeps the SSR list (no rebuild) and reads every row back as a sound', async () => {
 		const el = await mount({
