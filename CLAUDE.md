@@ -16,8 +16,8 @@ core's DOM-free renderer (`@arraypress/waveform-sounds/render`) inside a
 values do not. A new core option needs:
 1. Add it to the `Astro.props` destructure.
 2. A `setStr` / `setNum` / `setBool` / `setList` / `setJson` call emitting the
-   kebab-case `data-*` the core's `readDataOptions` (core.js) reads.
-3. If the server renderer reads it too (`resolveRenderOptions` in render.js),
+   kebab-case `data-*` the core's `readDataOptions` (`src/js/core/options.js`) reads.
+3. If the server renderer reads it too (`resolveRenderOptions` in `src/js/render/options.js`),
    pass it to `renderSounds(...)` as well — SSR markup and runtime must agree.
 
 `test/forwarding-drift.test.ts` renders every key of the installed core's
