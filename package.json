@@ -71,7 +71,7 @@
   },
   "devDependencies": {
     "@arraypress/waveform-player": "^1.29.1",
-    "@arraypress/waveform-sounds": "file:../waveform-sounds",
+    "@arraypress/waveform-sounds": "^0.1.0",
     "@types/jsdom": "^28.0.3",
     "@types/node": "^22.20.5",
     "astro": "^7.3.6",
