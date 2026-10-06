@@ -1,0 +1,39 @@
+---
+/**
+ * examples/basic.astro
+ * --------------------
+ *
+ * Copy into an Astro project's `src/pages/` to try `<WaveformSounds>`.
+ */
+import WaveformSounds from '@arraypress/waveform-sounds-astro';
+import '@arraypress/waveform-player/styles.css';
+import '@arraypress/waveform-sounds/styles.css';
+---
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>WaveformSounds Astro — examples</title>
+	</head>
+	<body style="max-width: 860px; margin: 2rem auto; font-family: system-ui;">
+		<h2>Server-rendered from an array</h2>
+		<WaveformSounds
+			id="pack"
+			sounds={[
+				{ url: '/previews/kick-01.mp3', title: 'Kick 01', type: 'Drums', bpm: 128, key: 'F minor', duration: 2.4 },
+				{ url: '/previews/bass-04.mp3', title: 'Bass Loop 04', type: 'Bass', bpm: 128, key: 'Fmin', duration: 8 },
+				{ url: '/previews/pad-02.mp3', title: 'Pad 02', type: 'Synth', bpm: 90, key: 'Am', duration: 16 },
+			]}
+			autoAdvance
+		/>
+
+		<h2>From a manifest, strip layout</h2>
+		<WaveformSounds manifest="/sounds.json" player="strip" pageSize={25} strings={{ count: '{count} samples' }} />
+
+		<script>
+			document.addEventListener('waveformsounds:play', (e) => {
+				console.log('playing', e.detail.sound.title);
+			});
+		</script>
+	</body>
+</html>

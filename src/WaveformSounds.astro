@@ -1,0 +1,187 @@
+---
+/**
+ * WaveformSounds.astro
+ * --------------------
+ *
+ * Astro component wrapper around `@arraypress/waveform-sounds`: a
+ * searchable, filterable list of sound previews (a sample pack, a preset
+ * bank, a sound library) with a mini waveform per row and ONE shared audio
+ * engine.
+ *
+ * ## Server-rendered, then adopted
+ *
+ * Given `sounds`, the component renders the whole list on the server with
+ * the core's DOM-free renderer (`@arraypress/waveform-sounds/render`) — the
+ * toolbar, the filter chips, every row. The browser runtime finds that
+ * markup (`[data-ws-list]`) and ADOPTS it rather than rebuilding it, so the
+ * list is readable, crawlable and laid out before any script runs.
+ *
+ * Given only `manifest` (a URL), it renders an empty container carrying
+ * `data-manifest`, and the runtime fetches and renders the list in the
+ * browser.
+ *
+ * ## Options travel as data-* attributes
+ *
+ * Every option is emitted as the `data-*` attribute the core reads
+ * (`readDataOptions` in the core's `core.js`): kebab-case, booleans as
+ * `"true"`/`"false"`, lists comma-separated, `strings` / `playerOptions` as
+ * JSON. An omitted prop emits nothing, so the core's default applies. The
+ * core's precedence is data-* > constructor > default, so these attributes
+ * are authoritative.
+ *
+ * ## Client script
+ *
+ * One processed (bundled) `<script>` — not `is:inline`, no `define:vars` —
+ * so it's the same external module on every page, which a strict hash-based
+ * CSP needs. It imports the player and the sounds runtime and initialises
+ * on load, on every ClientRouter `astro:page-load`, and prunes instances
+ * whose element left the page on `astro:after-swap`. See `lifecycle.ts`.
+ *
+ * Styles are NOT injected (the family's wrappers never do): import
+ * `@arraypress/waveform-player/styles.css` and
+ * `@arraypress/waveform-sounds/styles.css` in your layout.
+ *
+ * @example From an array
+ *   <WaveformSounds
+ *     sounds={[
+ *       { url: '/previews/kick.mp3', title: 'Kick 01', type: 'Drums', bpm: 128, key: 'Fmin' },
+ *       { url: '/previews/bass.mp3', title: 'Bass Loop', type: 'Bass', bpm: 128, key: 'F minor' },
+ *     ]}
+ *   />
+ *
+ * @example From a manifest (fetched in the browser)
+ *   <WaveformSounds manifest="/sounds.json" player="strip" pageSize={100} />
+ */
+
+import { renderSounds } from '@arraypress/waveform-sounds/render';
+import type { WaveformSoundsProps } from './types';
+
+const {
+	// ── Content ───────────────────────────────────────────────────────────
+	sounds,
+	manifest,
+	// ── Layout + toolbar ──────────────────────────────────────────────────
+	player,
+	search,
+	filters,
+	sortable,
+	loopToggle,
+	pageSize,
+	maxTypeChips,
+	columns,
+	// ── Row waveform ──────────────────────────────────────────────────────
+	waveformStyle,
+	waveformColor,
+	progressColor,
+	// ── Behaviour ─────────────────────────────────────────────────────────
+	loop,
+	autoAdvance,
+	arrowAudition,
+	// ── Objects (JSON) ────────────────────────────────────────────────────
+	strings,
+	playerOptions,
+	// ── Astro extras ──────────────────────────────────────────────────────
+	id,
+	class: className,
+} = Astro.props as WaveformSoundsProps;
+
+/** The container's `data-*` attributes; an omitted prop never emits one. */
+const data: Record<string, string> = {};
+
+/** A string attr, only when set. Empty strings are kept. */
+const setStr = (key: string, value: string | undefined | null): void => {
+	if (value === undefined || value === null) return;
+	data[key] = String(value);
+};
+
+/** A numeric attr, only when it's a finite number (`0` survives). */
+const setNum = (key: string, value: number | undefined | null): void => {
+	if (typeof value !== 'number' || !Number.isFinite(value)) return;
+	data[key] = String(value);
+};
+
+/**
+ * A boolean attr as `"true"` / `"false"`. The core reads a bare or `"true"`
+ * attribute as on and `"false"` as off, so the explicit `"false"` is what
+ * turns a default-on control (search, sort, loop toggle) off.
+ */
+const setBool = (key: string, value: boolean | undefined | null): void => {
+	if (value === undefined || value === null) return;
+	data[key] = value ? 'true' : 'false';
+};
+
+/**
+ * A list attr, comma-separated. An EMPTY array is emitted as `""` on
+ * purpose: the core reads that as "none" (`filters={[]}` = no filter
+ * controls), which is different from omitting it (= the default set).
+ */
+const setList = (key: string, value: readonly string[] | undefined | null): void => {
+	if (!Array.isArray(value)) return;
+	data[key] = value.join(',');
+};
+
+/** An object attr as JSON (functions inside it don't survive — by design). */
+const setJson = (key: string, value: object | undefined | null): void => {
+	if (value === undefined || value === null) return;
+	data[key] = JSON.stringify(value);
+};
+
+/**
+ * The layout, resolved the way the core's renderer resolves it — anything
+ * but `'strip'` is `'inline'` — because the server markup and the runtime
+ * must agree on it (inline rows carry a canvas; strip rows don't). Always
+ * emitted, like the core's own `renderSoundsElement`.
+ */
+const layout = player === 'strip' ? 'strip' : 'inline';
+data['data-player'] = layout;
+
+setStr('data-manifest', manifest);
+setBool('data-search', search);
+setList('data-filters', filters);
+setBool('data-sortable', sortable);
+setBool('data-loop-toggle', loopToggle);
+setNum('data-page-size', pageSize);
+setNum('data-max-type-chips', maxTypeChips);
+setList('data-columns', columns);
+setStr('data-waveform-style', waveformStyle);
+setStr('data-waveform-color', waveformColor);
+setStr('data-progress-color', progressColor);
+setBool('data-loop', loop);
+setBool('data-auto-advance', autoAdvance);
+setBool('data-arrow-audition', arrowAudition);
+setJson('data-strings', strings);
+setJson('data-player-options', playerOptions);
+
+/**
+ * The list, server-rendered — or nothing, when there are no `sounds` and the
+ * runtime is to fetch `manifest` instead. An array (even an empty one) is
+ * rendered, matching the core, which only fetches the manifest when it has
+ * no `sounds`. The options passed are exactly the ones the renderer reads;
+ * the same values are on the container for the runtime.
+ */
+const inner = Array.isArray(sounds)
+	? renderSounds(sounds, {
+			player: layout,
+			search,
+			filters,
+			sortable,
+			loopToggle,
+			pageSize,
+			maxTypeChips,
+			columns,
+			strings,
+		})
+	: '';
+---
+
+<div
+	data-waveform-sounds
+	{...data}
+	id={id}
+	class:list={['waveform-sounds', `waveform-sounds--${layout}`, className]}
+	set:html={inner}
+></div>
+
+<script>
+	import './client';
+</script>
