@@ -1,6 +1,6 @@
 {
   "name": "@arraypress/waveform-sounds-astro",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Astro component wrapper for @arraypress/waveform-sounds — a server-rendered, searchable, filterable sound list with typed props and ClientRouter support.",
   "type": "module",
   "files": [
@@ -61,7 +61,7 @@
   },
   "peerDependencies": {
     "@arraypress/waveform-player": "^1.24.5",
-    "@arraypress/waveform-sounds": "^0.1.0",
+    "@arraypress/waveform-sounds": "^0.2.0",
     "astro": "^6.0.0 || ^7.0.0"
   },
   "scripts": {
@@ -71,7 +71,7 @@
   },
   "devDependencies": {
     "@arraypress/waveform-player": "^1.29.1",
-    "@arraypress/waveform-sounds": "^0.1.0",
+    "@arraypress/waveform-sounds": "^0.2.0",
     "@types/jsdom": "^28.0.3",
     "@types/node": "^22.20.5",
     "astro": "^7.3.6",
